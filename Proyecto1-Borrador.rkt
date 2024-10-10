@@ -1,133 +1,221 @@
 #lang racket
-(displayln "Hola, Mundo")
 
+; ---------------------------------------------------------------------
+; 
+; (c) 2024 
+; EIF400 Paradigmas de Programación 
+; 2do ciclo 2024 
+; Proyecto #1 
+;
+; Jeffry Barquero Torres 118150438
+;
+;
+;
+;
+; version 1.0.0 2024-10-19 
+; 
+; ---------------------------------------------------------------------
 
-;DESPLIEGUE DE POLINOMIOS.
-
-;función display-p
+; Despliegue de polinomios
 (define (display-p p)
-  (define (term-to-string coef exp)
-    (cond
-      [(= coef 0) ""] ; Ignorar coeficientes 0
-      [(= exp 0) (number->string coef)] ; Término constante (sin 'x')
-      [(= exp 1) (string-append (if (= coef 1) "" (number->string coef)) "x")] ; Término con exponente 1
-      [else (string-append (if (= coef 1) "" (number->string coef)) "x^" (number->string exp))])) ; Otros exponentes
-  
-  (define (polynomial-to-string p exp)
-    (if (null? p)
-        ""
-        (let ([term (term-to-string (car p) exp)]
-              [rest (polynomial-to-string (cdr p) (+ exp 1))])
-          (if (string=? term "")
-              rest
-              (if (string=? rest "")
-                  term
-                  (string-append term " + " rest)))))) ; Concatenar términos con '+'
+  (let loop ((lst p) (exp 0))
+    (cond ((null? lst) (display "\n"))
+          ((= (car lst) 0) (loop (cdr lst) (+ exp 1)))
+          (else
+           (if (> exp 0)
+               (if (= exp 1)
+                   (display (string-append (number->string (car lst)) "x "))
+                   (display (string-append (number->string (car lst)) "x^" (number->string exp) " ")))
+               (display (number->string (car lst))))
+           (loop (cdr lst) (+ exp 1))))))
 
-  (display (polynomial-to-string p 0)))
+;-----------------------------
 
-(display-p '(1 0 0 3))
+; Suma de polinomios
 
-;SUMA DE POLINOMIOS
+;-----------------------------
 
-; Función para sumar dos polinomios
-(define (sumar-2-polinomios p1 p2)
-  (define len-diff (- (length p1) (length p2)))
-  (if (> len-diff 0)
-      (set! p2 (append (make-list len-diff 0) p2))
-      (set! p1 (append (make-list (- len-diff) 0) p1)))
-  (map + p1 p2))
-
-; Función para eliminar los ceros finales de un polinomio
-(define (simplificar-polinomio poly)
-  (let loop ([poly poly])
-    (if (and (not (empty? poly)) (= (last poly) 0))
-        (loop (take poly (- (length poly) 1)))
-        poly)))
-
-; Función para sumar una lista arbitraria de polinomios
 (define (+p . polys)
-  (define result (first polys))
-  (for ([p (rest polys)])
-    (set! result (sumar-2-polinomios result p)))
-  (simplificar-polinomio result))
+  (let* ((max-len (apply max (map length polys)))
+         (zeroes (make-list max-len 0)))
+    (map + (foldl (lambda (p acc) (append zeroes (take (reverse p) max-len)) acc) zeroes polys))))
 
-; Ejemplo de uso
-(+p '(2 3 1) '(1 0 4) '(3 2 1 1)) ; Suma de tres polinomios
-(+p '(3 2 0 5) '(1 0 4 7));
-(+p '(0 2 3 1) '(1 0 4 0) '(3 0 2 4))
-(+p '(1 1 0 1 0) '(0 2 3 0 1) '(0 0 0 3 4) '(5 2 0 0 0 0))
-(+p '(2 5 0 0 6) '(-2 -5 0 0 3))
+;-----------------------------
 
-; RESTA DE POLINOMIOS
+; Resta de polinomios
 
-; Función para restar dos polinomios
-(define (restar-polinomios p1 p2)
-  (define len-diff (- (length p1) (length p2)))
-  (if (> len-diff 0)
-      (set! p2 (append (make-list len-diff 0) p2))
-      (set! p1 (append (make-list (- len-diff) 0) p1)))
-  (map - p1 p2))
+;-----------------------------
 
-; Función para restar una lista arbitraria de polinomios (asociativa por la izquierda)
-(define (restar-polynomials . polys)
-  (define result (first polys))
-  (for ([p (rest polys)])
-    (set! result (restar-polinomios result p)))
-  (simplificar-polinomio result))
+(define (-p . polys)
+  (foldl (lambda (p1 p2)
+           (+p p1 (map - p2)))
+         (car polys)
+         (cdr polys)))
 
-; Función para eliminar los ceros finales de un polinomio (opcional, ya usada anteriormente)
-(define (simplificar-polinomioS poly)
-  (let loop ([poly poly])
-    (if (and (not (empty? poly)) (= (last poly) 0))
-        (loop (take poly (- (length poly) 1)))
-        poly)))
+;-----------------------------
 
-; Ejemplos de uso:
-(restar-polynomials '(3 2 0 5) '(1 0 4 7)) ; Ejemplo con dos polinomios
-(restar-polynomials '(5 0 2) '(3 0 1) '(2 0 1)) ; Ejemplo con tres polinomios
-(restar-polynomials '(5 0 1 0 3) '(2 0 2 0 4))
+; Multiplicación de polinomios
 
-(newline)
-(newline)
-(newline)
+;-----------------------------
 
-
-;MULTIPLICACIÓN DE POLINOMIOS
-
-;; Multiplica un término de un polinomio por todo el otro polinomio, con un desplazamiento correspondiente al exponente
-(define (multiply-by-term term exp poly)
-  (append (make-list exp 0)  ; Desplazar según el exponente
-          (map (lambda (x) (* term x)) poly)))  ; Multiplicar cada coeficiente por el término
-
-;; Suma dos polinomios, similar a lo que ya hicimos en la suma
-(define (sum-coefficients p1 p2)
-  (define (extend-with-zeros p len)
-    (if (< (length p) len)
-        (append p (make-list (- len (length p)) 0))  ; Añade ceros a la lista más pequeña
-        p))
-  
-  (define max-length (max (length p1) (length p2)))
-  (define p1-extended (extend-with-zeros p1 max-length))
-  (define p2-extended (extend-with-zeros p2 max-length))
-  
-  (map + p1-extended p2-extended))  ; Suma de coeficientes
-
-;; Multiplica dos polinomios
-(define (mul-coefficients p1 p2)
-  (define (mul-helper p1 exp)
+(define (*p p1 p2)
+  (define (add-to-result result term pos)
+    (let ((padded (append (make-list pos 0) term)))
+      (+p result padded)))
+  (let loop ((p1 p1) (pos 0) (result '(0)))
     (if (null? p1)
-        '()
-        (sum-coefficients (multiply-by-term (car p1) exp p2) (mul-helper (cdr p1) (+ exp 1)))))
-  (mul-helper p1 0))
+        result
+        (loop (cdr p1) (+ pos 1) (add-to-result result (map (lambda (x) (* x (car p1))) p2) pos))))))
 
-;; Multiplica una cantidad arbitraria de polinomios
-(define (*p . polynomials)
-  (foldl mul-coefficients '(1) polynomials))  ; Acumula el producto de todos los polinomios
+;-----------------------------
+
+; Cociente de la división de polinomios
+
+;-----------------------------
+
+(define (qt-p p1 p2)
+  ;; Función auxiliar para obtener el grado del polinomio
+  (define (degree p)
+    (- (length p) 1))
+
+  ;; Función auxiliar para multiplicar un polinomio por un monomio (coeficiente y exponente)
+  (define (mul-monomial p coef exp)
+    (map (lambda (x) (* x coef)) (append (make-list exp 0) p)))
+
+  ;; División recursiva
+  (define (divide p1 p2 quotient)
+    (let ((deg1 (degree p1))
+          (deg2 (degree p2)))
+      (if (< deg1 deg2)
+          (reverse quotient)  ; Si el grado de p1 es menor que el de p2, retornamos el cociente
+          (let* ((coef (/ (car p1) (car p2)))  ; Cociente de los coeficientes principales
+                 (exp (- deg1 deg2))           ; Diferencia de grados
+                 (monomial (mul-monomial p2 coef exp))  ; Multiplicamos p2 por el monomio
+                 (remainder (+p p1 (map - monomial))))  ; Resta del polinomio
+            (divide remainder p2 (cons coef quotient))))))
+
+  ;; Inicia la división recursiva con un cociente vacío
+  (divide p1 p2 '()))
+
+;-----------------------------
+
+; Residuo de la división de polinomios
+
+;-----------------------------
+
+(define (rem-p p1 p2)
+  ;; Función auxiliar para obtener el grado del polinomio
+  (define (degree p)
+    (- (length p) 1))
+
+  ;; Función auxiliar para multiplicar un polinomio por un monomio (coeficiente y exponente)
+  (define (mul-monomial p coef exp)
+    (map (lambda (x) (* x coef)) (append (make-list exp 0) p)))
+
+  ;; División recursiva para obtener el residuo
+  (define (divide p1 p2)
+    (let ((deg1 (degree p1))
+          (deg2 (degree p2)))
+      (if (< deg1 deg2)
+          p1  ; Si el grado de p1 es menor que el de p2, p1 es el residuo
+          (let* ((coef (/ (car p1) (car p2)))  ; Cociente de los coeficientes principales
+                 (exp (- deg1 deg2))           ; Diferencia de grados
+                 (monomial (mul-monomial p2 coef exp))  ; Multiplicamos p2 por el monomio
+                 (remainder (+p p1 (map - monomial))))  ; Resta del polinomio
+            (divide remainder p2)))))
 
 
-(*p '(1 2) '(1 1))  ; (1 + 2x) * (1 + x)
-(*p '(1 0 2) '(2))  ; (x^2 + 2) * 2
+  ;; Inicia la división recursiva para obtener el residuo
+  (divide p1 p2))
 
+;-----------------------------
 
+; División completa
 
+;-----------------------------
+
+(define (/-p p1 p2)
+  (list (qt-p p1 p2) (rem-p p1 p2)))
+
+;-----------------------------
+
+; Derivación de polinomios
+
+;-----------------------------
+
+(define (drv-p . polys)
+  (map (lambda (p)
+         (let loop ((p (cdr p)) (exp 1) (result '()))
+           (if (null? p)
+               (reverse result)
+               (loop (cdr p) (+ exp 1) (cons (* (car p) exp) result)))))
+       polys))
+
+;-----------------------------
+
+; Evaluación de polinomios usando el algoritmo Horner
+
+;-----------------------------
+
+(define (eval-p p x)
+  (foldr (lambda (coef acc) (+ coef (* acc x))) 0 p))
+
+;-----------------------------
+
+; Factorización de polinomios
+
+;-----------------------------
+
+(define (cbrt x)
+  (expt x (/ 1 3)))
+
+(define (fact-p p)
+  ;; Función auxiliar para calcular el grado del polinomio
+  (define (degree p)
+    (- (length p) 1))
+
+  ;; Función auxiliar para calcular las raíces de un polinomio cuadrático
+  (define (quadratic-roots a b c)
+    (define discriminant (- (* b b) (* 4 a c)))
+    (if (< discriminant 0)
+        '()  ; No hay raíces reales
+        (let* ((root1 (/ (+ (- b) (sqrt discriminant)) (* 2 a)))
+               (root2 (/ (- (- b) (sqrt discriminant)) (* 2 a)))
+               (factors (list (list 1 (- root1)) (list 1 (- root2))))  ; Factores lineales
+               )
+          factors)))
+
+  ;; Función auxiliar para calcular las raíces de un polinomio cúbico
+  (define (cubic-roots a b c d)
+    ;; Utiliza el método de Cardano para encontrar raíces
+    (let* ((delta0 (- (* b b) (* 3 a c)))
+           (delta1 (- (* 2 (expt b 3)) (* 9 a b c) (* 27 (expt a 2 d))))
+           (C (cbrt (/ (+ delta1 (sqrt (- (expt delta1 2) (* 4 (expt delta0 3))))) 2)))
+           (u1 (/ (- b) (* 3 a)))
+           (u2 (/ (- (sqrt 3) C) (* 3 a)))
+           (u3 (/ (+ delta0 C) (* 3 a))))
+      ;; Calcula las raíces
+      (list u1 u2 u3)))
+
+  ;; Verifica el grado del polinomio y aplica la factorización correspondiente
+  (let ((deg (degree p)))
+    (cond
+      ((= deg 2)  ; Polinomio cuadrático
+       (let ((a (car p))
+             (b (cadr p))
+             (c (caddr p)))
+         (let ((roots (quadratic-roots a b c)))
+           (if (null? roots)
+               (list p)  ; No se puede factorizar
+               roots))))  ; Regresa los factores
+      ((= deg 3)  ; Polinomio cúbico
+       (let ((a (car p))
+             (b (cadr p))
+             (c (caddr p))
+             (d (cadddr p)))
+         (let ((roots (cubic-roots a b c d)))
+           (if (null? roots)
+               (list p)  ; No se puede factorizar
+               roots))))  ; Regresa los factores
+      (else
+       (list p)))))  ; Grados superiores no manejados

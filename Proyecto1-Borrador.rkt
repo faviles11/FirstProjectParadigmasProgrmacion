@@ -43,9 +43,11 @@
 ;-----------------------------
 
 (define (+p . polys)
-  (let* ((max-len (apply max (map length polys)))
-         (zeroes (make-list max-len 0)))
-    (map + (foldl (lambda (p acc) (append zeroes (take (reverse p) max-len)) acc) zeroes polys))))
+  (let* ((max-len (apply max (map length polys))))
+    (apply map +
+           (map (lambda (p)
+                  (append p (make-list (- max-len (length p)) 0)))
+                polys))))
 
 ;-----------------------------
 
@@ -227,6 +229,7 @@
       (else
        (list p)))))  ; Grados superiores no manejados
 
+#|
 (display-p '(0))
 (display-p '(0 0 0 1))
 (display-p '(0 0 0 2))
@@ -348,4 +351,10 @@
 (display-p '(-1 1 0 2))
 (display-p '(1 0 1 1))
 (display-p '(2 -1 -2 2))
+|# 
+
+; Pruebas para la suma de polinomios (+p)
+(display "Pruebas para +p:\n")
+(display-p (+p '(1 2 3) '(3 2 1))) ; Output esperado: 4 + 4x + 4x^2
+(display-p (+p '(0 1 0 1) '(1 0 1))) ; Output esperado: 1 + x + x^2 + x^3
 

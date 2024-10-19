@@ -65,7 +65,7 @@
   (let loop ((p1 p1) (pos 0) (result '(0)))
     (if (null? p1)
         result
-        (loop (cdr p1) (+ pos 1) (add-to-result result (map (lambda (x) (* x (car p1))) p2) pos))))))
+        (loop (cdr p1) (+ pos 1) (add-to-result result (map (lambda (x) (* x (car p1))) p2) pos)))))
 
 ;-----------------------------
 

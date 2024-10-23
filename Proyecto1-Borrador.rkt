@@ -180,10 +180,12 @@
 
 ;-----------------------------
 
+#lang racket
+
 (define (cbrt x)
   (if (>= x 0)
-      (expt x (/ 1 3))
-      (- (expt (- x) (/ 1 3)))))
+      (expt x (/ 1 3.0))
+      (- (expt (- x) (/ 1 3.0)))))
 
 (define (fact-p p)
   ;; Función auxiliar para calcular el grado del polinomio
@@ -201,9 +203,20 @@
 
   ;; Función auxiliar para calcular las raíces de un polinomio cúbico
   (define (cubic-roots a b c d)
-    ;; Aquí puedes expandir con el método de Cardano o usar un enfoque numérico para resolver
-    ;; por simplicidad se puede devolver un valor de prueba por ahora
-    (list '("Raíces cúbicas aún no implementadas")))
+    ;; Verifica si a es 0, en cuyo caso es un polinomio cuadrático
+    (if (= a 0)
+        (quadratic-roots b c d)
+        (let* ((delta0 (- (* b b) (* 3 a c)))
+               (delta1 (- (* 2 (expt b 3)) (* 9 a b c) (* 27 (expt a 2) d)))
+               (discriminant (+ (expt delta1 2) (* -4 (expt delta0 3))))
+               (C (if (= delta0 0) 0 (cbrt (/ (+ delta1 (sqrt discriminant)) 2.0)))))
+          ;; Verifica si C es 0 para evitar división por 0
+          (if (= C 0)
+              (quadratic-roots b c d)
+              (let* ((root1 (/ (+ (- b) C) (* 3 a)))
+                     (root2 (/ (+ (- b) (* C (cos (/ (* 2 pi) 3)))) (* 3 a)))
+                     (root3 (/ (+ (- b) (* C (cos (/ (* 4 pi) 3)))) (* 3 a))))
+                (list (list 1 (- root1)) (list 1 (- root2)) (list 1 (- root3))))))))
 
   ;; Verifica el grado del polinomio y aplica la factorización correspondiente
   (let ((deg (degree p)))

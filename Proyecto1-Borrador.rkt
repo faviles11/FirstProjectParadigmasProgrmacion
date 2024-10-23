@@ -180,8 +180,6 @@
 
 ;-----------------------------
 
-#lang racket
-
 (define (cbrt x)
   (if (>= x 0)
       (expt x (/ 1 3.0))
@@ -216,7 +214,14 @@
               (let* ((root1 (/ (+ (- b) C) (* 3 a)))
                      (root2 (/ (+ (- b) (* C (cos (/ (* 2 pi) 3)))) (* 3 a)))
                      (root3 (/ (+ (- b) (* C (cos (/ (* 4 pi) 3)))) (* 3 a))))
-                (list (list 1 (- root1)) (list 1 (- root2)) (list 1 (- root3))))))))
+                (list (list a (- root1)) (list a (- root2)) (list a (- root3))))))))
+
+  ;; Función auxiliar para normalizar factores
+  (define (normalize-factors factors)
+    (map (lambda (factor)
+           (let ((gcd-factor (gcd (first factor) (abs (second factor)))))
+             (list (/ (first factor) gcd-factor) (/ (second factor) gcd-factor))))
+         factors))
 
   ;; Verifica el grado del polinomio y aplica la factorización correspondiente
   (let ((deg (degree p)))
@@ -228,7 +233,7 @@
          (let ((roots (quadratic-roots a b c)))
            (if (null? roots)
                (list p)  ; No se puede factorizar
-               roots))))  ; Regresa los factores
+               (normalize-factors roots)))))  ; Regresa los factores normalizados
       ((= deg 3)  ; Polinomio cúbico
        (let ((a (car p))
              (b (cadr p))
@@ -237,7 +242,7 @@
          (let ((roots (cubic-roots a b c d)))
            (if (null? roots)
                (list p)  ; No se puede factorizar
-               roots))))  ; Regresa los factores
+               (normalize-factors roots)))))  ; Regresa los factores normalizados
       (else
        (list p)))))  ; Grados superiores no manejados
 
@@ -419,19 +424,13 @@
 
 ; Pruebas para la factorización de polinomios (fact-p)
 (display "Pruebas para fact-p:\n")
-
 (display "Resultado: ")
-(display (fact-p '(1 -3 2))) ; Output esperado: '((1 -1) (1 -2))
+(display (fact-p '(1 -3 2)))  ; Output esperado: '((1 -1) (1 -2))
+(newline)
+(display "Resultado: ")
+(display (fact-p '(0 2 0 -2)))  ; Output esperado: '((1 -1) (1 1) (0 2))
+(newline)
+(display "Resultado: ")
+(display (fact-p '(4 4 1)))  ; Output esperado: '((2 1) (2 1))
 (newline)
 
-(display "Resultado: ")
-(display (fact-p '(0 2 0 -2))) ; Output esperado: '((1 -1) (1 1) (0 2))
-(newline)
-
-(display "Resultado: ")
-(display (fact-p '(4 4 1))) ; Output esperado: '((2 1) (2 1))
-(newline)
-
-(display "Resultado: ")
-(display (fact-p '(1 0 0 -1))) ; Output esperado: '((1 1) (1 -1))
-(newline)

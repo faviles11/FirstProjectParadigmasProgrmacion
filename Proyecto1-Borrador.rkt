@@ -262,7 +262,8 @@
 ; Resultado esperado: '(0 0 0)
 (newline)
 
-;-----------------------------
+
+
 
 ; Cociente de la división de polinomios
 
@@ -273,10 +274,109 @@
       '() ; Si el grado de p1 es menor que p2, el cociente es 0
       (let* ((coef-cociente (/ (car p1) (car p2))) ; Divide los coeficientes principales
              (p2-multiplicado (multiplicar-polinomios p2 coef-cociente)) ; Multiplica p2 por coeficiente del cociente
-             (resto (restar-polinomios p1 p2-multiplicado))) ; Resta el polinomio ajustado
-        (cons coef-cociente (dividir-polinomios-cociente (quitar-ceros resto) p2))))) ; Llama recursivamente
+             (resto (restar-polinomios-c p1 p2-multiplicado))) ; Resta el polinomio ajustado
+        (cons coef-cociente (dividir-polinomios-cociente (quitar-ceros-c resto) p2))))) ; Llama recursivamente
 
 (define (multiplicar-polinomios p c)
+  (map (lambda (x) (* x c)) p)) ; Multiplica cada término por un escalar
+
+(define (restar-polinomios-c p1 p2)
+  (if (null? p2)
+      p1 ; Si p2 es nulo, no hay nada que restar
+      (map - p1 (append p2 (make-list (- (length p1) (length p2)) 0))))) ; Resta alineando los grados
+
+(define (quitar-ceros-c p)
+  (if (null? p)
+      '()
+      (if (= (car p) 0)
+          (quitar-ceros-c (cdr p))
+          p)))
+
+
+
+; Caso de prueba #1: División de 2x^2 + 3x + 1 entre x + 1
+(dividir-polinomios-cociente '(2 3 1) '(1 1))
+; Resultado esperado: '(2 1) — Cociente es 2x + 1
+
+; Caso de prueba #2: División de x^2 + 2x + 1 entre x^2 + 1
+(dividir-polinomios-cociente '(1 2 1) '(1 0 1))
+; Resultado esperado: '(1) — Cociente es 1
+
+; Caso de prueba #3: División de x + 1 entre x^2 + 1
+(dividir-polinomios-cociente '(1 1) '(1 0 1))
+; Resultado esperado: '() — Cociente es 0
+
+; Caso de prueba #4: División de x^2 + 3x + 2 entre x^2 + 3x + 2
+(dividir-polinomios-cociente '(1 3 2) '(1 3 2))
+; Resultado esperado: '(1) — Cociente es 1
+
+; Caso de prueba #5: División de 5x^3 - 4x^2 + 3x - 2 entre x - 1
+(dividir-polinomios-cociente '(5 -4 3 -2) '(1 -1))
+; Resultado esperado: '(5 1 4) — Cociente es 5x^2 + x + 4
+
+; Caso de prueba #6: División de 3x^4 + 2x^3 - x^2 + x - 3 entre x^2 + 1
+(dividir-polinomios-cociente '(3 2 -1 1 -3) '(1 0 1))
+; Resultado esperado: '(3 2 -4) — Cociente es 3x^2 + 2x - 4
+
+; Caso de prueba #7: División de 6x^3 - x^2 + x + 7 entre 2x^2 + 3
+(dividir-polinomios-cociente '(6 -1 1 7) '(2 0 3))
+; Resultado esperado: '(3 -0.5) — Cociente es 3x - 0.5
+
+; Caso de prueba #8: División de 4x^5 + x^4 - 2x^3 + 3x^2 - 5 entre x + 2
+(dividir-polinomios-cociente '(4 1 -2 3 0 -5) '(1 2))
+; Resultado esperado: '(4 -7 12 -21 42) — Cociente es 4x^4 - 7x^3 + 12x^2 - 21x + 42
+
+; Caso de prueba #9: División de 7x^2 - 4x + 5 entre x - 1
+(dividir-polinomios-cociente '(7 -4 5) '(1 -1))
+; Resultado esperado: '(7 3) — Cociente es 7x + 3
+
+; Caso de prueba #10: División de 4x^4 - 8x^3 + 4x^2 - 4 entre 2x^2 - 2
+(dividir-polinomios-cociente '(4 -8 4 0 -4) '(2 0 -2))
+; Resultado esperado: '(2 -4 4) — Cociente es 2x^2 - 4x + 4
+
+; Caso de prueba #11: División de 3x^2 + 6x + 9 entre x + 3
+(dividir-polinomios-cociente '(3 6 9) '(1 3))
+; Resultado esperado: '(3 -3) — Cociente es 3x -3
+
+; Caso de prueba #12: División de 6x^3 - 12x^2 + 18 entre 2x^2 - 2
+(dividir-polinomios-cociente '(6 -12 18 0) '(2 -2))
+; Resultado esperado: '(3 -3 6) — Cociente es 3x^2 - 3x + 6
+
+; Caso de prueba #13: División de x^3 + 5x^2 + 7x + 3 entre x + 2
+(dividir-polinomios-cociente '(1 5 7 3) '(1 2))
+; Resultado esperado: '(1 3 1) — Cociente es x^2 + 3x + 1
+
+; Caso de prueba #14: División de 2x^4 + 6x^3 + 4x^2 + 3x + 1 entre x^3 + 2x^2 + 3x + 4
+(dividir-polinomios-cociente '(2 6 4 3 1) '(1 2 3 4))
+; Resultado esperado: '(2 2) — Cociente es 2x + 2
+
+; Caso de prueba #15: División de 5x^5 - 10x^4 + 8x^3 + 6x^2 + 2 entre x^3 - 2x^2 + 4x - 3
+(dividir-polinomios-cociente '(5 -10 8 6 0 2) '(1 -2 4 -3))
+; Resultado esperado: '(5 -12) — Cociente es 5x^2 -12x +0
+
+; Caso de prueba #16: División de 3x^6 + 7x^5 + 5x^4 + 9x^3 + 4x^2 + 3x + 1 entre x^3 + x^2 + 2x + 3
+(dividir-polinomios-cociente '(3 7 5 9 4 3 1) '(1 1 2 3))
+; Resultado esperado: '(3 4 -5 -3) — Cociente es 3x^3 + 4x^2 -5x -3
+(newline)
+(newline)
+(newline)
+
+
+;--------------------------------------------
+
+; Residuo de la división de polinomios
+
+(define (dividir-polinomios-residuo p1 p2)
+  (if (< (length p1) (length p2))
+      p1 ; Si el grado de p1 es menor que p2, el residuo es p1
+      (let* ((coef-cociente (/ (car p1) (car p2))) ; Divide los coeficientes principales
+             (p2-multiplicado (multiplicar-polinomios-r p2 coef-cociente)) ; Multiplica p2 por coeficiente del cociente
+             (resto (restar-polinomios p1 p2-multiplicado))) ; Resta el polinomio ajustado
+        (dividir-polinomios-residuo (quitar-ceros resto) p2)))) ; Llama recursivamente para seguir dividiendo
+
+; Funciones auxiliares reutilizadas
+
+(define (multiplicar-polinomios-r p c)
   (map (lambda (x) (* x c)) p)) ; Multiplica cada término por un escalar
 
 (define (restar-polinomios p1 p2)
@@ -291,147 +391,155 @@
           (quitar-ceros (cdr p))
           p)))
 
+; Pruebas
 
-; Caso 1: División de 2x^2 + 3x + 1 entre x + 1
-(dividir-polinomios-cociente '(2 3 1) '(1 1))
-; Resultado esperado: '(2 1) — Cociente es 2x + 1
+; Caso de prueba #1: División de 2x^2 + 3x + 1 entre x + 1
+(dividir-polinomios-residuo '(2 3 1) '(1 1))
+; Resultado esperado: '() - Residuo es 0
 
-; Caso 2: División de 4x^3 - 6x^2 + 2x - 1 entre 2x - 1
-(dividir-polinomios-cociente '(4 -6 2 -1) '(2 -1))
-; Resultado esperado: '(2 -2 0) — Cociente es 2x^2 - 2x
+; Caso de prueba #2: División de x^2 + 2x + 1 entre x^2 + 1
+(dividir-polinomios-residuo '(1 2 1) '(1 0 1))
+; Resultado esperado: '(2 0) — Residuo es 2 0
 
-; Caso 3: División de x^2 + 2x + 1 entre x^2 + 1
-(dividir-polinomios-cociente '(1 2 1) '(1 0 1))
-; Resultado esperado: '(1 2) — Cociente es 1x + 2
+; Caso de prueba #3: División de x + 1 entre x^2 + 1
+(dividir-polinomios-residuo '(1 1) '(1 0 1))
+; Resultado esperado: '(1 1) — Residuo es x + 1
 
-; Caso 4: División de x + 1 entre x^2 + 1
-(dividir-polinomios-cociente '(1 1) '(1 0 1))
-; Resultado esperado: '() — Cociente es 0
+; Caso de prueba #4: División de x^2 + 3x + 2 entre x^2 + 3x + 2
+(dividir-polinomios-residuo '(1 3 2) '(1 3 2))
+; Resultado esperado: '() — Residuo es 0
 
-; Caso 5: División de x^2 + 3x + 2 entre x^2 + 3x + 2
-(dividir-polinomios-cociente '(1 3 2) '(1 3 2))
-; Resultado esperado: '(1) — Cociente es 1
+; Caso de prueba #5: División de 5x^3 - 4x^2 + 3x - 2 entre x - 1
+(dividir-polinomios-residuo '(5 -4 3 -2) '(1 -1))
+; Resultado esperado: '(2) — Residuo es 2
 
-; Caso 6: División de 5x^3 - 4x^2 + 3x - 2 entre x - 1
-(dividir-polinomios-cociente '(5 -4 3 -2) '(1 -1))
-; Resultado esperado: '(5 1 4) — Cociente es 5x^2 + x + 4
+; Caso de prueba #6: División de 3x^4 + 2x^3 - x^2 + x - 3 entre x^2 + 1
+(dividir-polinomios-residuo '(3 2 -1 1 -3) '(1 0 1))
+; Resultado esperado: '(-1 1) — Residuo es -x + 1
 
-; Caso 7: División de 3x^4 + 2x^3 - x^2 + x - 3 entre x^2 + 1
-(dividir-polinomios-cociente '(3 2 -1 1 -3) '(1 0 1))
-; Resultado esperado: '(3 2 -1) — Cociente es 3x^2 + 2x - 1
+; Caso de prueba #7: División de 6x^3 - x^2 + x + 7 entre 2x^2 + 3
+(dividir-polinomios-residuo '(6 -1 1 7) '(2 0 3))
+; Resultado esperado: '(-8 8.5) — Residuo es -8x + 8.5
 
-; Caso 8: División de 6x^3 - x^2 + x + 7 entre 2x^2 + 3
-(dividir-polinomios-cociente '(6 -1 1 7) '(2 0 3))
-; Resultado esperado: '(3 -0.5) — Cociente es 3x - 0.5
+; Caso de prueba #8: División de 4x^5 + x^4 - 2x^3 + 3x^2 - 5 entre x + 2
+(dividir-polinomios-residuo '(4 1 -2 3 0 -5) '(1 2))
+; Resultado esperado: '(-89) — Residuo es -89
 
-; Caso 9: División de 4x^5 + x^4 - 2x^3 + 3x^2 - 5 entre x + 2
-(dividir-polinomios-cociente '(4 1 -2 3 0 -5) '(1 2))
-; Resultado esperado: '(4 -7 12 -21 42) — Cociente es 4x^4 - 7x^3 + 12x^2 - 21x + 42
+; Caso de prueba #9: División de 7x^2 - 4x + 5 entre x - 1
+(dividir-polinomios-residuo '(7 -4 5) '(1 -1))
+; Resultado esperado: '(8) — Residuo es 8
+
+; Caso de prueba #10: División de 4x^4 - 8x^3 + 4x^2 - 4 entre 2x^2 - 2
+(dividir-polinomios-residuo '(4 -8 4 0 -4) '(2 0 -2))
+; Resultado esperado: '(-8 4) — Residuo -8x + 4
+
+; Caso de prueba #11: División de 3x^2 + 6x + 9 entre x + 3
+(dividir-polinomios-residuo '(3 6 9) '(1 3))
+; Resultado esperado: '(18) — Residuo es 18
+
+; Caso de prueba #12: División de 6x^3 - 12x^2 + 18 entre 2x^2 - 2
+(dividir-polinomios-residuo '(6 -12 18 0) '(2 -2))
+; Resultado esperado: '(12) — Residuo es 12
+
+; Caso de prueba #13: División de x^3 + 5x^2 + 7x + 3 entre x + 2
+(dividir-polinomios-residuo '(1 5 7 3) '(1 2))
+; Resultado esperado: '(1) — Residuo es 1
+
+; Caso de prueba #14: División de 2x^4 + 6x^3 + 4x^2 + 3x + 1 entre x^3 + 2x^2 + 3x + 4
+(dividir-polinomios-residuo '(2 6 4 3 1) '(1 2 3 4))
+; Resultado esperado: '(-6 -11 -7) — Residuo es -6x^2 -11x -7
+
+; Caso de prueba #15: División de 5x^5 - 10x^4 + 8x^3 + 6x^2 + 2 entre x^3 - 2x^2 + 4x - 3
+(dividir-polinomios-residuo '(5 -10 8 6 0 2) '(1 -2 4 -3))
+; Resultado esperado: '(-3 48 -34) — Residuo es -3x^2 + 48x - 34)
+
+; Caso de prueba #16: División de 3x^6 + 7x^5 + 5x^4 + 9x^3 + 4x^2 + 3x + 1 entre x^3 + x^2 + 2x + 3
+(dividir-polinomios-residuo '(3 7 5 9 4 3 1) '(1 1 2 3))
+; Resultado esperado: '(5 24 10) — Residuo es  5x^2 +24x + 10
+
+(newline)
 (newline)
 
 
+;--------------------------------------------------
 
-;-----------------------------
-; Residuo de la división de polinomios
-;-----------------------------
+;   DIVISION COMPLETA
 
-(define (residuo-polinomios p1 p2)
-  (if (< (length p1) (length p2))
-      p1 ; Si el grado de p1 es menor que p2, el residuo es p1
-      (let* ((coef-cociente (/ (car p1) (car p2))) ; Divide los coeficientes principales
-             (p2-multiplicado (multiplica-polinomios p2 coef-cociente)) ; Multiplica p2 por el coeficiente
-             (resto (resta-polinomios p1 p2-multiplicado))) ; Calcula el nuevo residuo
-        (residuo-polinomios (quitarceros resto) p2)))) ; Llama recursivamente con el resto
+;--------------------------------------------------
 
-(define (multiplica-polinomios p c)
-  (map (lambda (x) (* x c)) p)) ; Multiplica cada coeficiente por un escalar
-
-(define (resta-polinomios p1 p2)
-  (if (null? p2)
-      p1 ; Si p2 es nulo, no hay nada que restar
-      (map - p1 (append p2 (make-list (- (length p1) (length p2)) 0))))) ; Resta alineando los grados
-
-(define (quitarceros p)
-  (if (null? p)
-      '()
-      (if (= (car p) 0)
-          (quitarceros (cdr p))
-          p)))
-
-;;CASOS DE PRUEBA
-
-;; Caso 1: División exacta (p1 es divisible por p2)
-(residuo-polinomios '(6 2) '(3))  ; Esperado: '(0)
-
-;; Caso 2: Resto no cero
-(residuo-polinomios '(5 0 1) '(1 1))  ; Esperado: '(2)
-
-;; Caso 3: p1 es menor que p2
-(residuo-polinomios '(1 2) '(3 4 5))  ; Esperado: '(1 2)
-
-;; Caso 4: Grado de p1 igual al de p2
-(residuo-polinomios '(1 2 3) '(1 1 1))  ; Esperado: '(0)
-
-;; Caso 5: p1 con grado mayor que p2
-(residuo-polinomios '(4 0 0 1) '(1 1))  ; Esperado: '(3 -1)
-
-;; Caso 6: p2 es de mayor grado que p1
-(residuo-polinomios '(2 3) '(1 0 1))  ; Esperado: '(2 3)
+(define (/--p p1 p2)
+  (let ((cociente (dividir-polinomios-cociente p1 p2))  ; Calcula el cociente
+        (residuo (dividir-polinomios-residuo p1 p2)))   ; Calcula el residuo
+    (list cociente residuo)))  ; Retorna una lista con el cociente y el residuo
 
 
-;-----------------------------
 
-; División completa
+; Caso de prueba #1: División de 2x^2 + 3x + 1 entre x + 1
+(/--p  '(2 3 1) '(1 1))
+; Resultado esperado: '((2 1) ())
 
-;-----------------------------
+; Caso de prueba #2: División de x^2 + 2x + 1 entre x^2 + 1
+(/--p  '(1 2 1) '(1 0 1))
+; Resultado esperado: '((1) (2 0))
 
-(define (dividir-polinomios p1 p2)
-  (if (< (length p1) (length p2))
-      (list '() p1) ; Si el grado de p1 es menor que el de p2, el cociente es 0 y el residuo es p1
-      (let* ((coef-cociente (/ (car p1) (car p2))) ; Divide los coeficientes principales
-             (p2-multiplicado (multiplicar-polinomios-d p2 coef-cociente)) ; Multiplica p2 por coeficiente
-             (resto (restar-polinomios-d p1 p2-multiplicado))) ; Resta el polinomio ajustado
-        (let ((resultado (dividir-polinomios (quitar-ceros resto) p2))) ; Llamada recursiva
-          (list (cons coef-cociente (car resultado)) (cadr resultado)))))) ; Devuelve cociente y residuo
+; Caso de prueba #3: División de x + 1 entre x^2 + 1
+(/--p  '(1 1) '(1 0 1))
+; Resultado esperado: '(() (1 1))
 
-; Multiplica un polinomio por un escalar
-(define (multiplicar-polinomios-d p c)
-  (map (lambda (x) (* x c)) p))
+; Caso de prueba #4: División de x^2 + 3x + 2 entre x^2 + 3x + 2
+(/--p  '(1 3 2) '(1 3 2))
+; Resultado esperado: '((1) ())
 
-; Resta dos polinomios, alineando los grados
-(define (restar-polinomios-d p1 p2)
-  (map - p1 (append p2 (make-list (- (length p1) (length p2)) 0))))
+; Caso de prueba #5: División de 5x^3 - 4x^2 + 3x - 2 entre x - 1
+(/--p  '(5 -4 3 -2) '(1 -1))
+; Resultado esperado: '((5 1 4) (2))
 
-; Quita los ceros iniciales de un polinomio
-(define (quitar-ceros-d p)
-  (if (null? p)
-      '()
-      (if (= (car p) 0)
-          (quitar-ceros (cdr p))
-          p)))
+; Caso de prueba #6: División de 3x^4 + 2x^3 - x^2 + x - 3 entre x^2 + 1
+(/--p '(3 2 -1 1 -3) '(1 0 1))
+; Resultado esperado: '((3 2 -4) (-1 1))
 
-;; CASOS DE PRUEBA
+; Caso de prueba #7: División de 6x^3 - x^2 + x + 7 entre 2x^2 + 3
+(/--p  '(6 -1 1 7) '(2 0 3))
+; Resultado esperado: '((3 -1/2) (-8 8 1/2))
 
-;; Caso 1: División de 2x^2 + 3x + 1 entre x + 1
-(dividir-polinomios '(2 3 1) '(1 1))
-;; Resultado esperado: '((2 1) ())
+; Caso de prueba #8: División de 4x^5 + x^4 - 2x^3 + 3x^2 - 5 entre x + 2
+(/--p  '(4 1 -2 3 0 -5) '(1 2))
+; Resultado esperado: '((4 -7 12 -21 42) (-89))
 
-;; Caso 2: División de 4x^3 - 6x^2 + 2x - 1 entre 2x - 1
-(dividir-polinomios '(4 -6 2 -1) '(2 -1))
-;; Resultado esperado: '((2 -2 0) ())
+; Caso de prueba #9: División de 7x^2 - 4x + 5 entre x - 1
+(/--p  '(7 -4 5) '(1 -1))
+; Resultado esperado: '((7 3) (8))
 
-;; Caso 3: División de x^2 + 2x + 1 entre x^2 + 1
-(dividir-polinomios '(1 2 1) '(1 0 1))
-;; Resultado esperado: '((1 2) ())
+; Caso de prueba #10: División de 4x^4 - 8x^3 + 4x^2 - 4 entre 2x^2 - 2
+(/--p  '(4 -8 4 0 -4) '(2 0 -2))
+; Resultado esperado: '((2 -4 4) (-8 4))
 
-;; Caso 4: División de x + 1 entre x^2 + 1
-(dividir-polinomios '(1 1) '(1 0 1))
-;; Resultado esperado: '(() (1 1))
+; Caso de prueba #11: División de 3x^2 + 6x + 9 entre x + 3
+(/--p  '(3 6 9) '(1 3))
+; Resultado esperado: '((3 -3) (18))
 
-;; Caso 5: División de x^2 + 3x + 2 entre x^2 + 3x + 2
-(dividir-polinomios '(1 3 2) '(1 3 2))
-;; Resultado esperado: '((1) ())
-(newline)
+; Caso de prueba #12: División de 6x^3 - 12x^2 + 18 entre 2x^2 - 2
+(/--p  '(6 -12 18 0) '(2 -2))
+; Resultado esperado: '((3 -3 6) (12))
+
+; Caso de prueba #13: División de x^3 + 5x^2 + 7x + 3 entre x + 2
+(/--p  '(1 5 7 3) '(1 2))
+; Resultado esperado: '((1 3 1) (1))
+
+; Caso de prueba #14: División de 2x^4 + 6x^3 + 4x^2 + 3x + 1 entre x^3 + 2x^2 + 3x + 4
+(/--p  '(2 6 4 3 1) '(1 2 3 4))
+; Resultado esperado: '((2 2) (-6 -11 -7))
+
+; Caso de prueba #15: División de 5x^5 - 10x^4 + 8x^3 + 6x^2 + 2 entre x^3 - 2x^2 + 4x - 3
+(/--p  '(5 -10 8 6 0 2) '(1 -2 4 -3))
+; Resultado esperado: '((5 -12) (-3 48 -34))
+
+; Caso de prueba #16: División de 3x^6 + 7x^5 + 5x^4 + 9x^3 + 4x^2 + 3x + 1 entre x^3 + x^2 + 2x + 3
+(/--p  '(3 7 5 9 4 3 1) '(1 1 2 3))
+; Resultado esperado: '((3 4 -5 -3) (5 24 10))
+
+
+
 
 ;-----------------------------
 

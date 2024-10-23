@@ -408,3 +408,23 @@
 (display "Resultado: ")
 (display (eval-p '(5 1 2 3) -2)) ; Output esperado: -13
 (newline)
+(newline)
+
+; Pruebas para la factorización de polinomios (fact-p)
+(display "Pruebas para fact-p:\n")
+
+(display "Resultado: ")
+(display (fact-p '(1 -3 2))) ; Output esperado: '((1 -1) (1 -2))
+(newline)
+
+(display "Resultado: ")
+(display (fact-p '(0 2 0 -2))) ; Output esperado: '((1 -1) (1 1) (0 2))
+(newline)
+
+(display "Resultado: ")
+(display (fact-p '(4 4 1))) ; Output esperado: '((2 1) (2 1))
+(newline)
+
+(display "Resultado: ")
+(display (fact-p '(1 0 0 -1))) ; Output esperado: '((1 1) (1 -1))
+(newline)

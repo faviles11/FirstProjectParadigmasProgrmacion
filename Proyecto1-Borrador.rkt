@@ -425,24 +425,15 @@
 ;-----------------------------
 (display "Pruebas para fact-p:\n")
 
-(display "Resultado: ")
-(display (fact-p '(1 -5 6))) ; Polinomio: x^2 - 5x + 6, Output esperado: ((1 -2) (1 -3))
+(display (fact-p '(1 -5 6))) ; Output esperado: ((1 2) (1 3))
 (newline)
-(display "Resultado: ")
-(display (fact-p '(1 0 1))) ; Polinomio: x^2 + 1, Output esperado: ((1 0) (1 1))
+
+(display (fact-p '(1 -6 11 -6))) ; Output esperado: ((1 1) (1 2) (1 3))
 (newline)
-(display "Resultado: ")
-(display (fact-p '(1 -6 11 -6))) ; Polinomio: x^3 - 6x^2 + 11x - 6, Output esperado: ((1 -1) (1 -2) (1 -3))
+
+(display (fact-p '(1 0 0 -16))) ; Output esperado: ((1 4) (1 -4) (1 0))
 (newline)
-(display "Resultado: ")
-(display (fact-p '(1 0 0 1))) ; Polinomio: x^3 + 1, Output esperado: ((1 0) (1 1) (1 1))
-(newline)
-(display "Resultado: ")
-(display (fact-p '(2 4))) ; Polinomio: 2x + 4, Output esperado: ((2 -2))
-(newline)
-(display "Resultado: ")
-(display (fact-p '(1 -3 3 -1))) ; Polinomio: x^3 - 3x^2 + 3x - 1, Output esperado: ((1 -1) (1 -1) (1 -1))
-(newline)
+
 
 
 

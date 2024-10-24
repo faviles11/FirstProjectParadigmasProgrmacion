@@ -175,9 +175,7 @@
   (foldr (lambda (coef acc) (+ coef (* acc x))) 0 p))
 
 ;-----------------------------
-
 ; Factorización de polinomios
-
 ;-----------------------------
 
 (define (cbrt x)
@@ -197,18 +195,16 @@
         '()  ; No hay raíces reales
         (let* ((root1 (/ (+ (- b) (sqrt discriminant)) (* 2 a)))
                (root2 (/ (- (- b) (sqrt discriminant)) (* 2 a))))
-          (list (list 1 (- root1)) (list 1 (- root2))))))  ; Factores lineales
+          (list (list a (- root1)) (list a (- root2))))))  ; Factores lineales
 
   ;; Función auxiliar para calcular las raíces de un polinomio cúbico
   (define (cubic-roots a b c d)
-    ;; Verifica si a es 0, en cuyo caso es un polinomio cuadrático
     (if (= a 0)
-        (quadratic-roots b c d)
+        (quadratic-roots b c d)  ; Si a es 0, trata como cuadrático
         (let* ((delta0 (- (* b b) (* 3 a c)))
                (delta1 (- (* 2 (expt b 3)) (* 9 a b c) (* 27 (expt a 2) d)))
                (discriminant (+ (expt delta1 2) (* -4 (expt delta0 3))))
                (C (if (= delta0 0) 0 (cbrt (/ (+ delta1 (sqrt discriminant)) 2.0)))))
-          ;; Verifica si C es 0 para evitar división por 0
           (if (= C 0)
               (quadratic-roots b c d)
               (let* ((root1 (/ (+ (- b) C) (* 3 a)))
@@ -219,7 +215,7 @@
   ;; Función auxiliar para normalizar factores
   (define (normalize-factors factors)
     (map (lambda (factor)
-           (let ((gcd-factor (gcd (first factor) (abs (second factor)))))
+           (let ((gcd-factor (gcd (first factor) (abs (second factor)))))  ;; Asegúrate de que gcd se defina
              (list (/ (first factor) gcd-factor) (/ (second factor) gcd-factor))))
          factors))
 
@@ -230,10 +226,12 @@
        (let ((a (car p))
              (b (cadr p))
              (c (caddr p)))
-         (let ((roots (quadratic-roots a b c)))
-           (if (null? roots)
-               (list p)  ; No se puede factorizar
-               (normalize-factors roots)))))  ; Regresa los factores normalizados
+         (if (= a 0)
+             (quadratic-roots b c 0)  ; Si a es 0, pasamos a (b, c, 0)
+             (let ((roots (quadratic-roots a b c)))
+               (if (null? roots)
+                   (list p)  ; No se puede factorizar
+                   (normalize-factors roots))))))  ; Regresa los factores normalizados
       ((= deg 3)  ; Polinomio cúbico
        (let ((a (car p))
              (b (cadr p))
@@ -445,3 +443,6 @@
 (display "Resultado: ")
 (display (fact-p '(1 -3 3 -1))) ; Polinomio: x^3 - 3x^2 + 3x - 1, Output esperado: ((1 -1) (1 -1) (1 -1))
 (newline)
+
+
+

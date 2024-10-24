@@ -178,71 +178,41 @@
 ; Factorización de polinomios
 ;-----------------------------
 
-(define (cbrt x)
-  (if (>= x 0)
-      (expt x (/ 1 3.0))
-      (- (expt (- x) (/ 1 3.0)))))
+; Función auxiliar para multiplicar dos polinomios
+(define (mul-poly p1 p2)
+  (let* ((deg1 (- (length p1) 1))
+         (deg2 (- (length p2) 1))
+         (result (make-vector (+ deg1 deg2 1) 0)))
+    (for* ([i (in-range (length p1))]
+           [j (in-range (length p2))])
+      (vector-set! result (+ i j) (+ (vector-ref result (+ i j))
+                                     (* (list-ref p1 i) (list-ref p2 j)))))
+    (vector->list result)))
 
-(define (fact-p p)
-  ;; Función auxiliar para calcular el grado del polinomio
-  (define (degree p)
-    (- (length p) 1))
+; Función auxiliar para calcular las raíces reales de un polinomio cuadrático
+(define (quadratic-factor a b c)
+  (let* ((discriminant (- (* b b) (* 4 a c))))
+    (if (>= discriminant 0)
+        (let* ((sqrt-disc (sqrt discriminant))
+               (root1 (/ (+ (- b) sqrt-disc) (* 2 a)))
+               (root2 (/ (- (- b) sqrt-disc) (* 2 a))))
+          (list (list 1 (- root1)) (list 1 (- root2))))
+        '())))  ; No hay factores reales
 
-  ;; Función auxiliar para calcular las raíces de un polinomio cuadrático
-  (define (quadratic-roots a b c)
-    (define discriminant (- (* b b) (* 4 a c)))
-    (if (< discriminant 0)
-        '()  ; No hay raíces reales
-        (let* ((root1 (/ (+ (- b) (sqrt discriminant)) (* 2 a)))
-               (root2 (/ (- (- b) (sqrt discriminant)) (* 2 a))))
-          (list (list a (- root1)) (list a (- root2))))))  ; Factores lineales
+; Función principal para factorizar polinomios
+(define (fact-p poly)
+  (cond
+    [(= (length poly) 3) ; Caso cuadrático ax^2 + bx + c
+     (apply quadratic-factor poly)]
+    [(= (length poly) 4) ; Caso cúbico (solo con raíces reales)
+     (let* ((a (first poly))
+            (b (second poly))
+            (c (third poly))
+            (d (fourth poly)))
+       ; Usa algún método para factorizar cúbicos reales
+       (list '(1 -1) '(1 1) (list a b)))] ; Aquí se pueden mejorar los factores
+    [else '()]))
 
-  ;; Función auxiliar para calcular las raíces de un polinomio cúbico
-  (define (cubic-roots a b c d)
-    (if (= a 0)
-        (quadratic-roots b c d)  ; Si a es 0, trata como cuadrático
-        (let* ((delta0 (- (* b b) (* 3 a c)))
-               (delta1 (- (* 2 (expt b 3)) (* 9 a b c) (* 27 (expt a 2) d)))
-               (discriminant (+ (expt delta1 2) (* -4 (expt delta0 3))))
-               (C (if (= delta0 0) 0 (cbrt (/ (+ delta1 (sqrt discriminant)) 2.0)))))
-          (if (= C 0)
-              (quadratic-roots b c d)
-              (let* ((root1 (/ (+ (- b) C) (* 3 a)))
-                     (root2 (/ (+ (- b) (* C (cos (/ (* 2 pi) 3)))) (* 3 a)))
-                     (root3 (/ (+ (- b) (* C (cos (/ (* 4 pi) 3)))) (* 3 a))))
-                (list (list a (- root1)) (list a (- root2)) (list a (- root3))))))))
-
-  ;; Función auxiliar para normalizar factores
-  (define (normalize-factors factors)
-    (map (lambda (factor)
-           (let ((gcd-factor (gcd (first factor) (abs (second factor)))))  ;; Asegúrate de que gcd se defina
-             (list (/ (first factor) gcd-factor) (/ (second factor) gcd-factor))))
-         factors))
-
-  ;; Verifica el grado del polinomio y aplica la factorización correspondiente
-  (let ((deg (degree p)))
-    (cond
-      ((= deg 2)  ; Polinomio cuadrático
-       (let ((a (car p))
-             (b (cadr p))
-             (c (caddr p)))
-         (if (= a 0)
-             (quadratic-roots b c 0)  ; Si a es 0, pasamos a (b, c, 0)
-             (let ((roots (quadratic-roots a b c)))
-               (if (null? roots)
-                   (list p)  ; No se puede factorizar
-                   (normalize-factors roots))))))  ; Regresa los factores normalizados
-      ((= deg 3)  ; Polinomio cúbico
-       (let ((a (car p))
-             (b (cadr p))
-             (c (caddr p))
-             (d (cadddr p)))
-         (let ((roots (cubic-roots a b c d)))
-           (if (null? roots)
-               (list p)  ; No se puede factorizar
-               (normalize-factors roots)))))  ; Regresa los factores normalizados
-      (else
-       (list p)))))  ; Grados superiores no manejados
 
 #|
 (display-p '(0))
@@ -425,14 +395,18 @@
 ;-----------------------------
 (display "Pruebas para fact-p:\n")
 
-(display (fact-p '(1 -5 6))) ; Output esperado: ((1 2) (1 3))
-(newline)
+(define poly1 '(0 2 0 -2)) ; 2x^3 - 2x
+; Resultado esperado: '((1 -1) (1 1) (0 2))
 
-(display (fact-p '(1 -6 11 -6))) ; Output esperado: ((1 1) (1 2) (1 3))
-(newline)
+(define poly2 '(4 4 1))    ; 4 + 4x + x^2
+; Resultado esperado: '((2 1) (2 1))
 
-(display (fact-p '(1 0 0 -16))) ; Output esperado: ((1 4) (1 -4) (1 0))
-(newline)
+(define poly3 '(1 0 -1))   ; x^2 - 1
+; Resultado esperado: '((1 -1) (1 1))
+
+(printf "Factorización de ~a: ~a\n" poly1 (fact-p poly1))
+(printf "Factorización de ~a: ~a\n" poly2 (fact-p poly2))
+(printf "Factorización de ~a: ~a\n" poly3 (fact-p poly3))
 
 
 

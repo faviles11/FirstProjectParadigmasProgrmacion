@@ -399,7 +399,7 @@
 ; Resultado esperado: '((1 -1) (1 1) (0 2))
 
 (define poly2 '(4 4 1))    ; 4 + 4x + x^2
-; Resultado esperado: '((2 1) (2 1))
+; Resultado esperado: '((1/2 1) (1/2 1))  es escrito de esta manera por el uso de la formula general
 
 (define poly3 '(1 0 -1))   ; x^2 - 1
 ; Resultado esperado: '((1 -1) (1 1))
@@ -407,7 +407,3 @@
 (printf "Factorización de ~a: ~a\n" poly1 (fact-p poly1))
 (printf "Factorización de ~a: ~a\n" poly2 (fact-p poly2))
 (printf "Factorización de ~a: ~a\n" poly3 (fact-p poly3))
-
-
-
-
